@@ -1,3 +1,5 @@
+import { useDispatch, useSelector } from 'react-redux';
+import { setContact } from 'redux/contactsSlice';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { nanoid } from 'nanoid';
@@ -7,8 +9,6 @@ import {
   StyledButton,
   Error,
 } from './ContactForm.style';
-import { useDispatch, useSelector } from 'react-redux';
-import { setContact } from 'redux/contactsSlice';
 
 const scheme = Yup.object().shape({
   name: Yup.string()
@@ -31,10 +31,11 @@ export const ContactForm = () => {
 
     if (existingContact) {
       alert(`${newContact.name} вже є у списку контактів!`);
-      return;
+      return false;
     }
 
     dispatch(setContact(newContact));
+    return true;
   };
 
   return (
@@ -45,9 +46,11 @@ export const ContactForm = () => {
           number: '',
         }}
         validationSchema={scheme}
-        onSubmit={(values, actions) => {
-          addContactHandler({ ...values, id: nanoid() });
-          actions.resetForm();
+        onSubmit={async (values, actions) => {
+          const addSuccessfuly = addContactHandler({ ...values, id: nanoid() });
+          if (addSuccessfuly) {
+            actions.resetForm();
+          }
         }}
       >
         <StyledForm>
