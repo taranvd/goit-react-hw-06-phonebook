@@ -7,6 +7,8 @@ import {
   StyledButton,
   Error,
 } from './ContactForm.style';
+import { useDispatch, useSelector } from 'react-redux';
+import { setContact } from 'redux/contactsSlice';
 
 const scheme = Yup.object().shape({
   name: Yup.string()
@@ -18,7 +20,23 @@ const scheme = Yup.object().shape({
   number: Yup.number().required('Required!'),
 });
 
-export const ContactForm = ({ addContact }) => {
+export const ContactForm = () => {
+  const contacts = useSelector(state => state.contacts);
+  const dispatch = useDispatch();
+
+  const addContactHandler = newContact => {
+    const existingContact = contacts.find(
+      contact => contact.name.toLowerCase() === newContact.name.toLowerCase()
+    );
+
+    if (existingContact) {
+      alert(`${newContact.name} вже є у списку контактів!`);
+      return;
+    }
+
+    dispatch(setContact(newContact));
+  };
+
   return (
     <>
       <Formik
@@ -28,7 +46,7 @@ export const ContactForm = ({ addContact }) => {
         }}
         validationSchema={scheme}
         onSubmit={(values, actions) => {
-          addContact({ ...values, id: nanoid() });
+          addContactHandler({ ...values, id: nanoid() });
           actions.resetForm();
         }}
       >

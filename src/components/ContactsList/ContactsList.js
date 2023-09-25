@@ -4,20 +4,34 @@ import {
   List,
   ListItem,
 } from './ContactsList.style';
-export const ContactsList = ({ contacts, deleteContact, onClearAll }) => {
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteContact } from 'redux/contactsSlice';
+import { clearAll } from 'redux/contactsSlice';
+
+export const ContactsList = () => {
+  const filter = useSelector(state => state.filter);
+  const contacts = useSelector(state => state.contacts);
+  const dispatch = useDispatch();
+
+  const visibleContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
   return (
     <List>
-      {contacts.map(contact => (
+      {visibleContacts.map(contact => (
         <ListItem key={contact.id}>
           <span style={{ textAlign: 'center' }}>{contact.name} </span>
           <span style={{ textAlign: 'center' }}>{contact.number}</span>
-          <ButtonStyled onClick={() => deleteContact(contact.id)}>
+          <ButtonStyled onClick={() => dispatch(deleteContact(contact.id))}>
             Delete
           </ButtonStyled>
         </ListItem>
       ))}
       {contacts.length >= 3 && (
-        <ButtonClearAll onClick={onClearAll}>Clear all</ButtonClearAll>
+        <ButtonClearAll onClick={() => dispatch(clearAll())}>
+          Clear all
+        </ButtonClearAll>
       )}
     </List>
   );
